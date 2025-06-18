@@ -1,5 +1,5 @@
 from database.initialData import insert_initial_data
-from services.agentService import get_data_by_llm
+from services.agentService import get_model_and_data
 from database.connection import engine, Base
 
 
@@ -8,11 +8,13 @@ def init_db():
 
 
 def get_question():
-    print("=== Consultor SQL com LLM ===")
-    pergunta = input("Digite sua consulta em linguagem natural: ")
+    print("=== Consultor SQL ===")
+    flag = input(
+        "Escolhar o modelo a utilizar (1 ou 2):\n1-LLM LLMA3 SQL DECODER (SERVIÇO EXTERNO)\n2- AGENT SPACY (SERVIÇO INTERNO)\n")
+    prompt = input("Digite sua consulta em linguagem natural: ")
 
     try:
-        resultado = get_data_by_llm(pergunta)
+        resultado = get_model_and_data(int(flag), prompt)
         print("\nResultado:")
         for linha in resultado:
             print(linha)

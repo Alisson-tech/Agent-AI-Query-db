@@ -1,0 +1,11 @@
+{
+  "labels":[
+    "listar_produtos",
+    "listar_vendas",
+    "quantidade_produtos_vendidos",
+    "valor_total_vendido",
+    "outro"
+  ],
+  "threshold":0.0,
+  "positive_label":null
+}
