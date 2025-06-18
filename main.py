@@ -1,6 +1,6 @@
-from database.connection import engine, Base
-from services.agentService import get_data_by_llm
 from database.initialData import insert_initial_data
+from services.agentService import get_data_by_llm
+from database.connection import engine, Base
 
 
 def init_db():
