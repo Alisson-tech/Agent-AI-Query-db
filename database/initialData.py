@@ -6,7 +6,8 @@ from models import Produto, Venda
 def insert_initial_data():
     session = SessionLocal()
     try:
-        print("Inserindo dados iniciais...")
+        if (session.query(Produto).count() != 0):
+            return
 
         produto1 = Produto(nome="Notebook Dell XPS 15", preco=8500.00)
         produto2 = Produto(nome="Monitor LG Ultrawide", preco=1500.00)
@@ -19,8 +20,8 @@ def insert_initial_data():
 
         vendas = []
 
-        base_date = datetime(2024, 1, 1, tzinfo=timezone.utc)
-        for i in range(20):
+        base_date = datetime(2025, 1, 1, tzinfo=timezone.utc)
+        for i in range(30):
             produto = produtos[i % 3]
             quantidade = 1 if i % 2 == 0 else 2
             data_venda = base_date + timedelta(days=30 * (i // 3), hours=i)

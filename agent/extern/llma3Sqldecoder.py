@@ -13,7 +13,7 @@ client = InferenceClient(
 
 def sql_generate(prompt: str) -> str:
     schema_prompt = """
-    Considerando o seguinte banco de dados com as tabelas e colunas:
+    Considerando o seguinte banco de dados PostgresSql com as tabelas e colunas:
 
     - produtos(id, nome, preco)
     - vendas(id, id_produto, quantidade, preco_unitario, preco_total, data)
@@ -34,7 +34,6 @@ def sql_generate(prompt: str) -> str:
     )
 
     sql_result = completion.choices[0].message.content.strip()
-    print(sql_result)
 
     if not _sql_validate(sql_result):
         raise ValueError("Query potencialmente perigosa detectada!")
