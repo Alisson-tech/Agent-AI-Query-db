@@ -7,9 +7,9 @@ model_path = os.path.abspath("agent/intern/trainer/model_classifier")
 
 nlp = spacy.load(model_path)
 
-CAMPOS_MODELS = {
+FIELDS_MODELS = {
     "produto": {
-        "nome": "texto",
+        "nome": "prompt",
         "preco": "numero"
     },
     "venda": {
@@ -20,9 +20,9 @@ CAMPOS_MODELS = {
     }
 }
 
-MODELOS_VALIDOS = {"produto", "venda"}
+VALID_MODELS = {"produto", "venda"}
 
-OPERADORES = {
+OPERATOR = {
     "maior que": ">",
     "acima de": ">",
     "menor que": "<",
@@ -36,78 +36,74 @@ OPERADORES = {
 }
 
 
-def get_query_filters(texto):
-    intencao = predict_intent(texto)
-    filtros = extrair_filtros(texto)
+def get_query_filters(prompt):
+    intent = predict_intent(prompt)
+    filters = extract_filters(prompt)
 
-    return (intencao, filtros)
+    return (intent, filters)
 
 
-def predict_intent(texto):
-    doc = nlp(texto)
+def predict_intent(prompt):
+    doc = nlp(prompt)
     intent = max(doc.cats, key=doc.cats.get)
-    print(f"Intenção: {intent}")
-    print(f"Probabilidades: {doc.cats}")
     return intent
 
 
-def interpretar_data(valor):
+def extract_date(value):
     for fmt in ("%d-%m-%Y", "%d/%m/%Y"):
         try:
-            return datetime.strptime(valor, fmt).strftime("%Y-%m-%d")
+            return datetime.strptime(value, fmt).strftime("%Y-%m-%d")
         except:
             pass
-    return valor
+    return value
 
 
-def extrair_filtros(texto):
-    texto = texto.lower()
-    filtros = []
+def extract_filters(prompt):
+    prompt = prompt.lower()
+    filters = []
 
-    # Detecta modelo mencionado no texto
-    modelo_usado = next(
-        (m for m in MODELOS_VALIDOS if m in texto or f"{m}s" in texto), None)
-    if not modelo_usado:
-        return filtros
+    used_model = next(
+        (m for m in VALID_MODELS if m in prompt or f"{m}s" in prompt), None)
+    if not used_model:
+        return filters
 
-    campos = CAMPOS_MODELS[modelo_usado]
+    fields = FIELDS_MODELS[used_model]
 
-    # Captura intervalo de datas
-    intervalo = re.search(
-        r"(\d{2}[-/]\d{2}[-/]\d{4})\s+(?:a|e|até)\s+(\d{2}[-/]\d{2}[-/]\d{4})", texto
+    interval = re.search(
+        r"(\d{2}[-/]\d{2}[-/]\d{4})\s+(?:a|e|até)\s+(\d{2}[-/]\d{2}[-/]\d{4})", prompt
     )
-    if intervalo and "data" in campos:
-        filtros.append({
+    if interval and "data" in fields:
+        filters.append({
             "campo": "data",
             "operador": ">=",
-            "valor": interpretar_data(intervalo.group(1)),
-            "tipo": "data"
+            "value": extract_date(interval.group(1)),
+            "type": "data"
         })
-        filtros.append({
+        filters.append({
             "campo": "data",
             "operador": "<=",
-            "valor": interpretar_data(intervalo.group(2)),
-            "tipo": "data"
+            "value": extract_date(interval.group(2)),
+            "type": "data"
         })
 
-    doc = nlp(texto)
+    doc = nlp(prompt)
     for token in doc:
-        if token.text in campos:
-            tipo = campos[token.text]
-            janela = doc[max(token.i - 3, 0): token.i + 4].text
-            for op_texto, op_simbolo in OPERADORES.items():
-                if op_texto in janela:
-                    match_valor = re.search(
-                        rf"{re.escape(op_texto)} ([\w/.,-]+)", janela)
-                    if match_valor:
-                        valor_bruto = match_valor.group(1)
-                        valor = interpretar_data(valor_bruto) if tipo == "data" else float(
-                            valor_bruto.replace(",", "."))
-                        filtros.append({
+        if token.text in fields:
+            type = fields[token.text]
+            windown = doc[max(token.i - 3, 0): token.i + 4].text
+            for op_prompt, op_simbolo in OPERATOR.items():
+                if op_prompt in windown:
+                    match_value = re.search(
+                        rf"{re.escape(op_prompt)} ([\w/.,-]+)", windown)
+                    if match_value:
+                        gross_value = match_value.group(1)
+                        value = extract_date(gross_value) if type == "data" else float(
+                            gross_value.replace(",", "."))
+                        filters.append({
                             "campo": token.text,
                             "operador": op_simbolo,
-                            "valor": valor,
-                            "tipo": tipo
+                            "value": value,
+                            "type": type
                         })
 
-    return filtros
+    return filters
