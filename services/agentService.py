@@ -1,6 +1,7 @@
 from agent.extern.llma3Sqldecoder import sql_generate
-from services.queryService import raw_sql
+from services.queryService import raw_sql, buscar, agregado
 from agent.intern.spacyGetKeyWords import get_query_filters
+from models import Produto, Venda
 
 
 def get_model_and_data(flag: int, prompt: str):
@@ -19,4 +20,18 @@ def _get_data_by_llm(prompt: str) -> list[dict]:
 
 
 def _get_data_by_spacy(prompt: str):
-    return get_query_filters(prompt)
+    intencao, filtros = get_query_filters(prompt)
+
+    if intencao == "listar_produtos":
+        return buscar(Produto, filtros)
+
+    elif intencao == "listar_vendas":
+        return buscar(Venda, filtros)
+
+    elif intencao == "quantidade_produtos_vendidos":
+        return agregado(Venda, filtros, Venda.quantidade)
+
+    elif intencao == "valor_total_vendido":
+        return agregado(Venda, filtros, Venda.preco_total)
+
+    return []

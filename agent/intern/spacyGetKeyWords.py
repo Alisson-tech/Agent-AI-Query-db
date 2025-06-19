@@ -40,11 +40,7 @@ def get_query_filters(texto):
     intencao = predict_intent(texto)
     filtros = extrair_filtros(texto)
 
-    print('\n\n')
-    print(intencao)
-    print('\n')
-    print(filtros)
-    return 'fim'
+    return (intencao, filtros)
 
 
 def predict_intent(texto):
@@ -52,7 +48,7 @@ def predict_intent(texto):
     intent = max(doc.cats, key=doc.cats.get)
     print(f"Intenção: {intent}")
     print(f"Probabilidades: {doc.cats}")
-    return intent, doc.cats
+    return intent
 
 
 def interpretar_data(valor):
