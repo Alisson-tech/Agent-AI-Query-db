@@ -76,13 +76,13 @@ def extract_filters(prompt):
         filters.append({
             "campo": "data",
             "operador": ">=",
-            "value": extract_date(interval.group(1)),
+            "valor": extract_date(interval.group(1)),
             "type": "data"
         })
         filters.append({
             "campo": "data",
             "operador": "<=",
-            "value": extract_date(interval.group(2)),
+            "valor": extract_date(interval.group(2)),
             "type": "data"
         })
 
