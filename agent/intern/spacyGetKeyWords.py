@@ -102,7 +102,7 @@ def extract_filters(prompt):
                         filters.append({
                             "campo": token.text,
                             "operador": op_simbolo,
-                            "value": value,
+                            "valor": value,
                             "type": type
                         })
 
