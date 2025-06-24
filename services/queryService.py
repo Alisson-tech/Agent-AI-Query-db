@@ -1,5 +1,6 @@
 from sqlalchemy import select, text, func
 from database import SessionLocal
+from sqlalchemy.dialects import postgresql
 
 
 OPERATOR_MAP = {
@@ -13,6 +14,8 @@ OPERATOR_MAP = {
 
 def raw_sql(sql: str) -> list[dict]:
     try:
+        print("\nQuery Gerada: ")
+        print(sql)
         with SessionLocal() as session:
             result = session.execute(text(sql))
             columns = result.keys()
@@ -31,6 +34,10 @@ def get_list_data(modelo, filtros: list[dict]) -> list[dict]:
                 if column and f["operador"] in OPERATOR_MAP:
                     stmt = stmt.where(
                         OPERATOR_MAP[f["operador"]](column, f["valor"]))
+
+            print("\nQuery Gerada: ")
+            print(stmt.compile(dialect=postgresql.dialect(),
+                  compile_kwargs={"literal_binds": True}))
             result = db.execute(stmt)
             columns_name = result.keys()
             return [dict(zip(columns_name, row)) for row in result.fetchall()]
@@ -48,6 +55,10 @@ def get_aggregate_data(modelo, filtros: list[dict], campo_agregado) -> list[dict
                 if column and f["operador"] in OPERATOR_MAP:
                     stmt = stmt.where(
                         OPERATOR_MAP[f["operador"]](column, f["valor"]))
+
+            print("\nQuery Gerada: ")
+            print(stmt.compile(dialect=postgresql.dialect(),
+                  compile_kwargs={"literal_binds": True}))
             result = db.execute(stmt)
             columns = result.keys()
             return [dict(zip(columns, row)) for row in result.fetchall()]
